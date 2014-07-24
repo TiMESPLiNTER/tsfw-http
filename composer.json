@@ -1,28 +1,30 @@
 {
-    "name": "timesplinter/tsfw-http",
-    "type": "library",
-    "description": "OO handling for HTTP requests and responses in PHP",
-    "keywords": ["tsfw", "http"],
-    "homepage": "http://github.com/TiMESPLiNTER/tsfw-http",
-    "license": "LGPL",
-    "require": {
-        "php": ">=5.1.0",
+	"name": "timesplinter/tsfw-http",
+	"type": "library",
+	"description": "OO handling for HTTP requests and responses in PHP",
+	"keywords": ["tsfw", "http"],
+	"homepage": "http://github.com/TiMESPLiNTER/tsfw-http",
+	"license": "LGPL",
+	
+	"require": {
+		"php": ">=5.1.0",
 		"timesplinter/tsfw-common": "0.1.*"
-    },
-    "autoload": {
-        "psr-4": {
-            "timesplinter\\": "src/timesplinter/"
-        }
-    },
-    "authors": [
-        {
-            "name": "Pascal Muenst",
-            "email": "dev@timesplinter.ch",
-            "homepage": "http://www.timesplinter.ch",
-            "role": "Company"
-        }
-    ],
-    "require-dev": {
-        "phpunit/phpunit": "3.7.*"
-    }
+	},
+	
+	"autoload": {
+		"psr-4": {
+			"timesplinter\\": "src/timesplinter/"
+		}
+	},
+	"authors": [
+		{
+			"name": "Pascal Muenst",
+			"email": "dev@timesplinter.ch",
+			"homepage": "http://www.timesplinter.ch",
+			"role": "Company"
+		}
+	],
+	"require-dev": {
+		"phpunit/phpunit": "3.7.*"
+	}
 }
