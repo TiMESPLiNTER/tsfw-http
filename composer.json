@@ -7,7 +7,7 @@
     "license": "LGPL",
     "require": {
         "php": ">=5.1.0",
-	    "timesplinter/tsfw-common": "0.1.*"
+		"timesplinter/tsfw-common": "0.1.*"
     },
     "autoload": {
         "psr-4": {
