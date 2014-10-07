@@ -8,9 +8,22 @@ use timesplinter\tsfw\common\StringUtils;
  * @author Pascal Muenst <dev@timesplinter.ch>
  * @copyright Copyright (c) 2014, TiMESPLiNTER Webdevelopment
  */
-class HttpRequest {
+class HttpRequest
+{
 	const PROTOCOL_HTTP = 'http';
 	const PROTOCOL_HTTPS = 'https';
+
+	const METHOD_GET = 'GET';
+	const METHOD_POST = 'POST';
+	const METHOD_PUT = 'PUT';
+	const METHOD_HEAD = 'HEAD';
+	const METHOD_DELETE = 'DELETE';
+	const METHOD_OPTIONS = 'OPTIONS';
+	const METHOD_TRACE = 'TRACE';
+	const METHOD_CONNECT = 'CONNECT';
+	const METHOD_PATCH = 'PATCH';
+	
+	protected static $basePath = '/index.php';
 
 	protected $protocol;
 	protected $host;
@@ -18,6 +31,7 @@ class HttpRequest {
 	protected $path;
 	protected $query;
 	protected $uri;
+	protected $headers;
 
 	protected $requestMethod;
 	protected $requestTime;
@@ -40,6 +54,7 @@ class HttpRequest {
 		
 		$this->acceptedEncodings = array();
 		$this->acceptedLanguages = array();
+		$this->headers = array();
 	}
 
 	/**
@@ -60,7 +75,7 @@ class HttpRequest {
 	 * @param array $requestData Data of the HTTP request
 	 * @return HttpRequest
 	 */
-	public static function create(array $requestData)
+	public static function create(array $requestData = array())
 	{
 		$defaultValues = array(
 			'REQUEST_TIME' => time(),
@@ -83,9 +98,9 @@ class HttpRequest {
 		$protocol = null;
 		
 		if($requestData['HTTPS'] !== null)
-			$protocol = ($requestData['HTTPS'] === 'on')?self::PROTOCOL_HTTPS:self::PROTOCOL_HTTP;
+			$protocol = ($requestData['HTTPS'] === 'on')?Http::PROTOCOL_HTTPS:Http::PROTOCOL_HTTP;
 		
-		$uri = StringUtils::startsWith($requestData['REQUEST_URI'], '/index.php')?StringUtils::afterFirst($requestData['REQUEST_URI'], '/index.php'):$requestData['REQUEST_URI'];
+		$uri = StringUtils::startsWith($requestData['REQUEST_URI'], self::$basePath)?StringUtils::afterFirst($requestData['REQUEST_URI'], self::$basePath):$requestData['REQUEST_URI'];
 		$path = StringUtils::beforeLast($uri, '?');
 
 		$languages = array();
@@ -101,7 +116,7 @@ class HttpRequest {
 
 		$requestTime = new \DateTime();
 		$requestTime->setTimestamp($requestData['REQUEST_TIME']);
-
+		
 		$httpRequest->setHost($requestData['SERVER_NAME']);
 		$httpRequest->setPath($path);
 		$httpRequest->setPort($requestData['SERVER_PORT']);
@@ -115,11 +130,27 @@ class HttpRequest {
 		$httpRequest->setAcceptedLanguages($languages);
 		$httpRequest->setRemoteAddress($requestData['REMOTE_ADDR']);
 
+		$headers = array();
+		
+		foreach($_SERVER as $name => $value) {
+			if(StringUtils::startsWith($name, 'HTTP_') === true) {
+				$name = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))));
+				$headers[$name] = $value;
+			} elseif ($name == 'CONTENT_TYPE') {
+				$headers['Content-Type'] = $value;
+			} elseif ($name == 'CONTENT_LENGTH') {
+				$headers['Content-Length'] = $value;
+			}
+		}
+		
+		$httpRequest->setHeaders($headers);
+
 		return $httpRequest;
 	}
 
 	/**
-	 * @param string $protocol
+	 * Set the protocol of this request. Either http or https.
+	 * @param string $protocol The protocol name
 	 */
 	public function setProtocol($protocol)
 	{
@@ -127,7 +158,8 @@ class HttpRequest {
 	}
 
 	/**
-	 * @return string
+	 * Get this requests protocol. Either http or https.
+	 * @return string The protocol name
 	 */
 	public function getProtocol()
 	{
@@ -135,7 +167,7 @@ class HttpRequest {
 	}
 
 	/**
-	 * Get this requests host
+	 * Get this requests protocol
 	 * @return string
 	 */
 	public function getHost()
@@ -171,6 +203,7 @@ class HttpRequest {
 	}
 
 	/**
+	 * Get this requests path (everything between the domain name and the optional query string)
 	 * @return string
 	 */
 	public function getPath()
@@ -179,6 +212,7 @@ class HttpRequest {
 	}
 
 	/**
+	 * Set this requests path (everything between the domain name and the optional query string)
 	 * @param string $path
 	 */
 	public function setPath($path)
@@ -187,7 +221,8 @@ class HttpRequest {
 	}
 
 	/**
-	 * @return string
+	 * Get this requests query (everything after the question mark "?")
+	 * @return string The query string
 	 */
 	public function getQuery()
 	{
@@ -195,7 +230,8 @@ class HttpRequest {
 	}
 
 	/**
-	 * @param string $query
+	 * Set this requests query (everything after the question mark "?")
+	 * @param string $query The query string
 	 */
 	public function setQuery($query)
 	{
@@ -203,6 +239,7 @@ class HttpRequest {
 	}
 
 	/**
+	 * Set this requests URI (everything after the domain name)
 	 * @param string $uri
 	 */
 	public function setURI($uri)
@@ -211,6 +248,7 @@ class HttpRequest {
 	}
 
 	/**
+	 * Get this requests URI (everything after the domain name)
 	 * @return string
 	 */
 	public function getURI()
@@ -255,7 +293,7 @@ class HttpRequest {
 	}
 
 	/**
-	 * 
+	 * Set the time when the current request has been fetched by the server
 	 * @param \DateTime $requestTime
 	 */
 	public function setRequestTime(\DateTime $requestTime)
@@ -322,6 +360,34 @@ class HttpRequest {
 	}
 
 	/**
+	 * Get this requests headers as name => value array
+	 * @return array The headers array
+	 */
+	public function getHeaders()
+	{
+		return $this->headers;
+	}
+
+	/**
+	 * Set this requests headers as name => value array
+	 * @param array $headers The headers array to be set
+	 */
+	public function setHeaders(array $headers)
+	{
+		$this->headers = $headers;
+	}
+
+	/**
+	 * Adds a header to this request
+	 * @param string $name The name of the header
+	 * @param string $value The value of the header
+	 */
+	public function addHeader($name, $value)
+	{
+		$this->headers[$name] = $value;
+	}
+
+	/**
 	 * Create an URL based on the current request and the given protocol
 	 * @param string $protocol
 	 * @return string
@@ -360,14 +426,29 @@ class HttpRequest {
 	/**
 	 * Returns the informations about a file
 	 * @param string $name The name of the file field
-	 * @return array|null Returns the information about the file or null if it does not exist
+	 * @return File|array|null Returns a single file object or an array of file objects or null if it does not exist
 	 */
 	public function getFile($name)
 	{
 		if(isset($this->files[$name]) === false)
 			return null;
 
-		return $this->files[$name];
+		if(is_array($this->files[$name]['name']) === false)
+			return File::createFromArray($this->files[$name]);
+		
+		return $this->getFilesNormalized($name);
+	}
+
+	/**
+	 * Alias of self::getFile()
+	 * 
+	 * @param $name
+	 *
+	 * @return array|null|File
+	 */
+	public function getFiles($name)
+	{
+		return $this->getFile($name);
 	}
 
 	/**
@@ -377,26 +458,43 @@ class HttpRequest {
 	 * @param string $name The name of the file field
 	 * @return array Returns an array with the information about the files
 	 */
-	public function getFiles($name)
+	protected function getFilesNormalized($name)
 	{
-		$filesArr = $this->getFile($name);
-
 		$files = array();
+		
+		if(isset($this->files[$name]) === false)
+			return $files;
+		
+		$filesArr = $this->files[$name];
 		$filesCount = count($filesArr['name']);
 
 		for($i = 0; $i < $filesCount; ++$i) {
-			$file = array(
+			$files[] = File::createFromArray(array(
 				'name' => $filesArr['name'][$i],
 				'type' => $filesArr['type'][$i],
 				'tmp_name' => $filesArr['tmp_name'][$i],
 				'error' => $filesArr['error'][$i],
 				'size' => $filesArr['size'][$i],
-			);
-
-			$files[] = $file;
+			));
 		}
 
 		return $files;
+	}
+
+	/**
+	 * Get the requests base path
+	 * @return string
+	 */
+	public static function getBasePath() {
+		return self::$basePath;
+	}
+
+	/**
+	 * Set the requests base path
+	 * @param string $basePath
+	 */
+	public static function setBasePath( $basePath ) {
+		self::$basePath = $basePath;
 	}
 }
 

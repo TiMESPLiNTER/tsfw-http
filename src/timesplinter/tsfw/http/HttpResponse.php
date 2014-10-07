@@ -6,8 +6,9 @@ namespace timesplinter\tsfw\http;
  * @author Pascal Muenst <dev@timesplinter.ch>
  * @copyright Copyright (c) 2014, TiMESPLiNTER Webdevelopment
  */
-class HttpResponse {
-	private static $STATUS_CODE_STRINGS = array(
+class HttpResponse
+{
+	protected static $STATUS_CODE_STRINGS = array(
 		// 1xx - Informations
 		 100 => 'Continue'
 		,101 => 'Switching Protocols'
