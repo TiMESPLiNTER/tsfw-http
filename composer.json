@@ -2,7 +2,7 @@
 	"name": "timesplinter/tsfw-http",
 	"type": "library",
 	"description": "OO handling for HTTP requests and responses in PHP",
-	"keywords": ["tsfw", "http"],
+	"keywords": ["tsfw", "http", "request", "response"],
 	"homepage": "http://github.com/TiMESPLiNTER/tsfw-http",
 	"license": "LGPL",
 	
