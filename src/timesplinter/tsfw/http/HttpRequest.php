@@ -98,7 +98,7 @@ class HttpRequest
 		$protocol = null;
 		
 		if($requestData['HTTPS'] !== null)
-			$protocol = ($requestData['HTTPS'] === 'on')?Http::PROTOCOL_HTTPS:Http::PROTOCOL_HTTP;
+			$protocol = ($requestData['HTTPS'] === 'on') ? HttpRequest::PROTOCOL_HTTPS : HttpRequest::PROTOCOL_HTTP;
 		
 		$uri = StringUtils::startsWith($requestData['REQUEST_URI'], self::$basePath)?StringUtils::afterFirst($requestData['REQUEST_URI'], self::$basePath):$requestData['REQUEST_URI'];
 		$path = StringUtils::beforeLast($uri, '?');
